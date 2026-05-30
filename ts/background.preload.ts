@@ -51,6 +51,10 @@ import {
   initialize as initializeExpiringMessageService,
   update as updateExpiringMessagesService,
 } from './services/expiringMessagesDeletion.preload.ts';
+import {
+  initialize as initializeLocalMessageRetentionDeletionService,
+  update as updateLocalMessageRetentionDeletionService,
+} from './services/localMessageRetentionDeletion.preload.ts';
 import { keyTransparency } from './services/keyTransparency.preload.ts';
 import {
   initialize as initializeNotificationProfilesService,
@@ -1429,6 +1433,7 @@ async function startApp(): Promise<void> {
     void badgeImageFileDownloader.checkForFilesToDownload();
 
     initializeExpiringMessageService();
+    initializeLocalMessageRetentionDeletionService();
     initializeNotificationProfilesService();
     keyTransparency.start();
 
@@ -1527,10 +1532,12 @@ async function startApp(): Promise<void> {
     });
 
     updateExpiringMessagesService();
+    updateLocalMessageRetentionDeletionService();
     updateNotificationProfileService();
     tapToViewMessagesDeletionService.update();
     window.Whisper.events.on('timetravel', () => {
       updateExpiringMessagesService();
+      updateLocalMessageRetentionDeletionService();
       updateNotificationProfileService();
       tapToViewMessagesDeletionService.update();
     });

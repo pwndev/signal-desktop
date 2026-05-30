@@ -46,6 +46,7 @@ import OS from '../../util/os/osPreload.preload.ts';
 import { themeChanged } from '../../shims/themeChanged.dom.ts';
 import * as Settings from '../../types/Settings.std.ts';
 import * as universalExpireTimerUtil from '../../util/universalExpireTimer.preload.ts';
+import * as localMessageRetentionTimerUtil from '../../util/localMessageRetentionTimer.preload.ts';
 import {
   parseSystemTraySetting,
   shouldMinimizeToSystemTray,
@@ -122,6 +123,7 @@ import { isLocalBackupsEnabled } from '../../util/isLocalBackupsEnabled.preload.
 import { getBackupKeyHash } from '../../services/backups/crypto.preload.ts';
 import { Emoji } from '../../axo/emoji.std.ts';
 import { AppProvider } from '../../windows/AppProvider.dom.tsx';
+import { update as updateLocalMessageRetentionDeletionService } from '../../services/localMessageRetentionDeletion.preload.ts';
 
 const DEFAULT_NOTIFICATION_SETTING = 'message';
 
@@ -287,6 +289,8 @@ export function SmartPreferences(): JSX.Element | null {
   };
 
   const universalExpireTimer = universalExpireTimerUtil.getForRedux(items);
+  const localMessageRetentionTimer =
+    localMessageRetentionTimerUtil.getForRedux(items);
   const onUniversalExpireTimerChange = async (newValue: number) => {
     await universalExpireTimerUtil.set(DurationInSeconds.fromSeconds(newValue));
 
@@ -302,6 +306,12 @@ export function SmartPreferences(): JSX.Element | null {
 
       await conversation.updateLastMessage();
     }
+  };
+  const onLocalMessageRetentionTimerChange = async (newValue: number) => {
+    await localMessageRetentionTimerUtil.set(
+      DurationInSeconds.fromSeconds(newValue)
+    );
+    updateLocalMessageRetentionDeletionService();
   };
 
   const validateBackup = () => backupsService._internalValidate();
@@ -987,6 +997,7 @@ export function SmartPreferences(): JSX.Element | null {
         lastLocalBackup={lastLocalBackup}
         lastSyncTime={lastSyncTime}
         localBackupFolder={localBackupFolder}
+        localMessageRetentionTimer={localMessageRetentionTimer}
         localeOverride={localeOverride}
         makeSyncRequest={makeSyncRequest}
         me={me}
@@ -1013,6 +1024,7 @@ export function SmartPreferences(): JSX.Element | null {
         onKeepMutedChatsArchivedChange={onKeepMutedChatsArchivedChange}
         onLastSyncTimeChange={onLastSyncTimeChange}
         onLinkPreviewsChange={onLinkPreviewsChange}
+        onLocalMessageRetentionTimerChange={onLocalMessageRetentionTimerChange}
         onLocaleChange={onLocaleChange}
         onMediaCameraPermissionsChange={onMediaCameraPermissionsChange}
         onMediaPermissionsChange={onMediaPermissionsChange}

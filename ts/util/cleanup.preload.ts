@@ -36,6 +36,7 @@ import {
 } from './migrations.preload.ts';
 import { hydrateStoryContext } from './hydrateStoryContext.preload.ts';
 import { update as updateExpiringMessagesService } from '../services/expiringMessagesDeletion.preload.ts';
+import { update as updateLocalMessageRetentionDeletionService } from '../services/localMessageRetentionDeletion.preload.ts';
 import { tapToViewMessagesDeletionService } from '../services/tapToViewMessagesDeletionService.preload.ts';
 import { throttledUpdateBackupMediaDownloadProgress } from './updateBackupMediaDownloadProgress.preload.ts';
 import { messageAttrsToPreserveAfterErase } from '../types/Message.std.ts';
@@ -45,6 +46,7 @@ const log = createLogger('cleanup');
 
 export async function postSaveUpdates(): Promise<void> {
   updateExpiringMessagesService();
+  updateLocalMessageRetentionDeletionService();
   tapToViewMessagesDeletionService.update();
 }
 

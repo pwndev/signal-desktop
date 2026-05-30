@@ -479,6 +479,7 @@ export default {
     lastSyncTime: Date.now(),
     localeOverride: null,
     localBackupFolder: undefined,
+    localMessageRetentionTimer: DurationInSeconds.fromHours(8),
     me,
     navTabsCollapsed: false,
     notificationContent: 'name',
@@ -583,6 +584,9 @@ export default {
     onLocaleChange: action('onLocaleChange'),
     onLastSyncTimeChange: action('onLastSyncTimeChange'),
     onLinkPreviewsChange: action('onLinkPreviewsChange'),
+    onLocalMessageRetentionTimerChange: action(
+      'onLocalMessageRetentionTimerChange'
+    ),
     onMediaCameraPermissionsChange: action('onMediaCameraPermissionsChange'),
     onMediaPermissionsChange: action('onMediaPermissionsChange'),
     onMessageAudioChange: action('onMessageAudioChange'),

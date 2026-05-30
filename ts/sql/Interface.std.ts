@@ -934,6 +934,13 @@ type ReadableInterface = {
   getExpiredMessages: () => Array<MessageType>;
   getMessagesUnexpectedlyMissingExpirationStartTimestamp: () => Array<MessageType>;
   getSoonestMessageExpiry: () => undefined | number;
+  getNextLocalMessageRetentionTimestampToAgeOut: (
+    retentionWindow: number
+  ) => undefined | number;
+  getLocalMessageRetentionMessagesNeedingDeletion: (
+    maxTimestamp: number,
+    limit: number
+  ) => Array<MessageType>;
   getNextTapToViewMessageTimestampToAgeOut: () => undefined | number;
   getTapToViewMessagesNeedingErase: (
     maxTimestamp: number

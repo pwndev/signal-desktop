@@ -7335,6 +7335,38 @@
     "messageformat": "Weeks",
     "description": "Name of the 'weeks' unit select for the custom disappearing message timeout dialog"
   },
+  "icu:LocalMessageRetentionDialog__label--value": {
+    "messageformat": "Number",
+    "description": "aria-label for the number select box in local message retention dialog"
+  },
+  "icu:LocalMessageRetentionDialog__label--units": {
+    "messageformat": "Unit of time",
+    "description": "aria-label for the units of time select box in local message retention dialog"
+  },
+  "icu:LocalMessageRetentionDialog__title": {
+    "messageformat": "Custom Local Retention Time",
+    "description": "Title for the custom local message retention timeout dialog"
+  },
+  "icu:LocalMessageRetentionDialog__body": {
+    "messageformat": "Choose when messages should be deleted from this device.",
+    "description": "Body for the custom local message retention timeout dialog"
+  },
+  "icu:LocalMessageRetentionDialog__set": {
+    "messageformat": "Set",
+    "description": "Text for the dialog button confirming the custom local message retention timeout"
+  },
+  "icu:Preferences__Privacy__deviceStorage": {
+    "messageformat": "Device Storage",
+    "description": "Section title in Privacy settings for local message retention controls"
+  },
+  "icu:settings__LocalMessageRetention__footer": {
+    "messageformat": "Delete messages and local attachments from this device after the selected time. This setting is local to this device and does not affect disappearing messages.",
+    "description": "Footer for the local message retention settings section"
+  },
+  "icu:settings__LocalMessageRetention__timer__label": {
+    "messageformat": "Local Message Retention",
+    "description": "Label for the local message retention timer setting"
+  },
   "icu:settings__DisappearingMessages__footer": {
     "messageformat": "Set a default disappearing message timer for all new chats started by you.",
     "description": "Footer for the Disappearing Messages settings section"

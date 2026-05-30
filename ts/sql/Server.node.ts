@@ -470,6 +470,8 @@ export const DataReader: ServerReadableInterface = {
   getExpiredMessages,
   getMessagesUnexpectedlyMissingExpirationStartTimestamp,
   getSoonestMessageExpiry,
+  getNextLocalMessageRetentionTimestampToAgeOut,
+  getLocalMessageRetentionMessagesNeedingDeletion,
   getNextTapToViewMessageTimestampToAgeOut,
   getTapToViewMessagesNeedingErase,
   getOlderMessagesByConversation,
@@ -6057,6 +6059,81 @@ function getSoonestMessageExpiry(db: ReadableDB): undefined | number {
   }
 
   return result || undefined;
+}
+
+function getNextLocalMessageRetentionTimestampToAgeOut(
+  db: ReadableDB,
+  retentionWindow: number
+): undefined | number {
+  // For outgoing messages: countdown from sent_at.
+  // For incoming messages: only eligible once read (readStatus != Unread/1),
+  //   countdown from readAt (stored in JSON) if available, else received_at.
+  const oldestRetainedTimestamp = db
+    .prepare(
+      `
+      SELECT MIN(startTimestamp) FROM (
+        SELECT sent_at AS startTimestamp
+        FROM messages
+        WHERE type = 'outgoing' AND sent_at > 0
+        UNION ALL
+        SELECT COALESCE(json_extract(json, '$.readAt'), received_at) AS startTimestamp
+        FROM messages
+        WHERE type != 'outgoing'
+          AND (readStatus IS NULL OR readStatus != 1)
+          AND COALESCE(json_extract(json, '$.readAt'), received_at) > 0
+      );
+      `,
+      {
+        pluck: true,
+      }
+    )
+    .get<number | null>();
+
+  if (!oldestRetainedTimestamp) {
+    return undefined;
+  }
+
+  const nextExpiryTimestamp = oldestRetainedTimestamp + retentionWindow;
+  if (nextExpiryTimestamp >= Number.MAX_SAFE_INTEGER) {
+    return undefined;
+  }
+
+  return nextExpiryTimestamp;
+}
+
+function getLocalMessageRetentionMessagesNeedingDeletion(
+  db: ReadableDB,
+  maxTimestamp: number,
+  limit: number
+): Array<MessageType> {
+  return db.transaction(() => {
+    const rows: Array<MessageTypeUnhydrated> = db
+      .prepare(
+        `
+        SELECT ${MESSAGE_COLUMNS.join(', ')}
+        FROM messages
+        WHERE (
+          -- Outgoing: delete after retention window from sent_at
+          (type = 'outgoing' AND sent_at > 0 AND sent_at <= $maxTimestamp)
+          OR
+          -- Incoming: only delete once read (not Unread=1); countdown from
+          -- readAt if set, else received_at
+          (type != 'outgoing'
+            AND (readStatus IS NULL OR readStatus != 1)
+            AND COALESCE(json_extract(json, '$.readAt'), received_at) > 0
+            AND COALESCE(json_extract(json, '$.readAt'), received_at) <= $maxTimestamp)
+        )
+        ORDER BY received_at ASC, sent_at ASC
+        LIMIT $limit;
+        `
+      )
+      .all({
+        maxTimestamp,
+        limit,
+      });
+
+    return hydrateMessages(db, rows);
+  })();
 }
 
 function getNextTapToViewMessageTimestampToAgeOut(

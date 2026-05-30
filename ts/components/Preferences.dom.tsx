@@ -20,6 +20,7 @@ import { ChatColorPicker } from './ChatColorPicker.dom.tsx';
 import { Checkbox } from './Checkbox.dom.tsx';
 import { WidthBreakpoint } from './_util.std.ts';
 import { DisappearingTimeDialog } from './DisappearingTimeDialog.dom.tsx';
+import { LocalMessageRetentionDialog } from './LocalMessageRetentionDialog.dom.tsx';
 import { PhoneNumberDiscoverability } from '../util/phoneNumberDiscoverability.std.ts';
 import { PhoneNumberSharingMode } from '../types/PhoneNumberSharingMode.std.ts';
 import { KEY_TRANSPARENCY_URL } from '../types/support.std.ts';
@@ -31,6 +32,10 @@ import {
   format as formatExpirationTimer,
 } from '../util/expirationTimer.std.ts';
 import { DurationInSeconds } from '../util/durations/index.std.ts';
+import {
+  LOCAL_MESSAGE_RETENTION_PRESETS,
+  LOCAL_MESSAGE_RETENTION_PRESETS_SET,
+} from '../util/localMessageRetentionTimer.preload.ts';
 import { focusableSelector } from '../util/focusableSelectors.std.ts';
 import { Modal } from './Modal.dom.tsx';
 import { SearchInput } from './SearchInput.dom.tsx';
@@ -166,6 +171,7 @@ export type PropsDataType = {
   lastSyncTime?: number;
   notificationContent: NotificationSettingType;
   osName: 'linux' | 'macos' | 'windows' | undefined;
+  localMessageRetentionTimer: DurationInSeconds;
   phoneNumber: string | undefined;
   selectedCamera?: string;
   selectedMicrophone?: AudioDevice;
@@ -332,6 +338,7 @@ type PropsFunctionType = {
   onKeepMutedChatsArchivedChange: CheckboxChangeHandlerType;
   onLastSyncTimeChange: (time: number) => unknown;
   onLinkPreviewsChange: CheckboxChangeHandlerType;
+  onLocalMessageRetentionTimerChange: SelectChangeHandlerType<number>;
   onLocaleChange: (locale: string | null | undefined) => void;
   onMediaCameraPermissionsChange: CheckboxChangeHandlerType;
   onMediaPermissionsChange: CheckboxChangeHandlerType;
@@ -490,6 +497,7 @@ export function Preferences({
   lastLocalBackup,
   lastSyncTime,
   localBackupFolder,
+  localMessageRetentionTimer,
   makeSyncRequest,
   me,
   navTabsCollapsed,
@@ -513,6 +521,7 @@ export function Preferences({
   onKeepMutedChatsArchivedChange,
   onLastSyncTimeChange,
   onLinkPreviewsChange,
+  onLocalMessageRetentionTimerChange,
   onLocaleChange,
   onMediaCameraPermissionsChange,
   onMediaPermissionsChange,
@@ -620,6 +629,8 @@ export function Preferences({
   const [showSyncFailed, setShowSyncFailed] = useState(false);
   const [nowSyncing, setNowSyncing] = useState(false);
   const [showDisappearingTimerDialog, setShowDisappearingTimerDialog] =
+    useState(false);
+  const [showLocalMessageRetentionDialog, setShowLocalMessageRetentionDialog] =
     useState(false);
   const [languageDialog, setLanguageDialog] = useState<LanguageDialog | null>(
     null
@@ -1679,6 +1690,8 @@ export function Preferences({
   } else if (settingsLocation.page === SettingsPage.Privacy) {
     const isCustomDisappearingMessageValue =
       !DEFAULT_DURATIONS_SET.has(universalExpireTimer);
+    const isCustomLocalMessageRetentionValue =
+      !LOCAL_MESSAGE_RETENTION_PRESETS_SET.has(localMessageRetentionTimer);
     let blockedDescription;
 
     if (
@@ -1777,6 +1790,66 @@ export function Preferences({
             onSubmit={onUniversalExpireTimerChange}
           />
         )}
+        {showLocalMessageRetentionDialog && (
+          <LocalMessageRetentionDialog
+            i18n={i18n}
+            initialValue={localMessageRetentionTimer}
+            onClose={() => setShowLocalMessageRetentionDialog(false)}
+            onSubmit={onLocalMessageRetentionTimerChange}
+          />
+        )}
+        <SettingsRow title={i18n('icu:Preferences__Privacy__deviceStorage')}>
+          <FlowingControl>
+            <div className="Preferences__two-thirds-flow">
+              <div>
+                {i18n('icu:settings__LocalMessageRetention__timer__label')}
+              </div>
+              <div className="Preferences__description">
+                {i18n('icu:settings__LocalMessageRetention__footer')}
+              </div>
+            </div>
+            <div
+              className={classNames(
+                'Preferences__flow-button',
+                'Preferences__one-third-flow',
+                'Preferences__one-third-flow--align-right'
+              )}
+            >
+              <Select
+                ariaLabel={i18n(
+                  'icu:settings__LocalMessageRetention__timer__label'
+                )}
+                onChange={value => {
+                  if (
+                    value === String(localMessageRetentionTimer) ||
+                    value === '-1'
+                  ) {
+                    setShowLocalMessageRetentionDialog(true);
+                    return;
+                  }
+
+                  onLocalMessageRetentionTimerChange(parseInt(value, 10));
+                }}
+                options={LOCAL_MESSAGE_RETENTION_PRESETS.map(seconds => ({
+                  value: seconds,
+                  text: formatExpirationTimer(i18n, seconds, {
+                    capitalizeOff: true,
+                  }),
+                })).concat([
+                  {
+                    value: isCustomLocalMessageRetentionValue
+                      ? localMessageRetentionTimer
+                      : DurationInSeconds.fromSeconds(-1),
+                    text: isCustomLocalMessageRetentionValue
+                      ? formatExpirationTimer(i18n, localMessageRetentionTimer)
+                      : i18n('icu:selectedCustomDisappearingTimeOption'),
+                  },
+                ])}
+                value={localMessageRetentionTimer}
+              />
+            </div>
+          </FlowingControl>
+        </SettingsRow>
         <SettingsRow title={i18n('icu:disappearingMessages')}>
           <FlowingControl>
             <div className="Preferences__two-thirds-flow">

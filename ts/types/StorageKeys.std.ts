@@ -133,6 +133,7 @@ export type StorageAccessType = {
   pni: string;
   version: string;
   linkPreviews: boolean;
+  localMessageRetentionTimer: number;
   universalExpireTimer: number;
   retryPlaceholders: ReadonlyArray<RetryItemType>;
   donationWorkflow: string;
@@ -383,6 +384,7 @@ export const STORAGE_KEYS_TO_PRESERVE_AFTER_UNLINK = [
   'phoneNumberSharingMode',
   'phoneNumberDiscoverability',
   'preferContactAvatars',
+  'localMessageRetentionTimer',
   'universalExpireTimer',
   'displayBadgesOnProfile',
   'keepMutedChatsArchived',
