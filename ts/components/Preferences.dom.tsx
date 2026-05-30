@@ -1119,7 +1119,9 @@ export function Preferences({
             <Select
               id={themeSelectId}
               disabled={themeSetting === undefined}
-              onChange={onThemeChange}
+              onChange={value => {
+                onThemeChange(value as ThemeType);
+              }}
               options={[
                 {
                   text: i18n('icu:themeSystem'),
@@ -1590,7 +1592,9 @@ export function Preferences({
               <Select
                 ariaLabel={i18n('icu:Preferences--notification-content')}
                 disabled={!hasNotifications}
-                onChange={onNotificationContentChange}
+                onChange={value => {
+                  onNotificationContentChange(value as NotificationSettingType);
+                }}
                 options={[
                   {
                     text: i18n('icu:nameAndMessage'),
@@ -2231,7 +2235,9 @@ export function Preferences({
               )}
             >
               <Select
-                onChange={onSentMediaQualityChange}
+                onChange={value => {
+                  onSentMediaQualityChange(value as SentMediaQualityType);
+                }}
                 options={[
                   {
                     text: i18n('icu:sentMediaQualityStandard'),
